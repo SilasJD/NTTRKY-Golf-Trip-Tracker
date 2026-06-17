@@ -29,3 +29,12 @@ export type ScoreRow = {
   strokes: number | null;
   updated_at: string;
 };
+
+export type HoleMvpRow = {
+  id: string;
+  tee_time_id: string;
+  hole_number: number;
+  team_name: string;
+  player_name: string;
+  updated_at: string;
+};

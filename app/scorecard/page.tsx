@@ -7,9 +7,25 @@ import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { TeeTimeManager } from "@/components/TeeTimeManager";
 import { ScoreGrid } from "@/components/ScoreGrid";
 
+const SELECTED_TEE_TIME_KEY = "nttrky-selected-tee-time";
+
 export default function ScorecardPage() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedIdState] = useState<string | null>(null);
+
+  function selectTeeTime(id: string) {
+    window.localStorage.setItem(SELECTED_TEE_TIME_KEY, id);
+    setSelectedIdState(id);
+  }
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(SELECTED_TEE_TIME_KEY);
+    // Reading localStorage requires an effect (a lazy useState initializer
+    // would cause an SSR/hydration mismatch instead), hence the one-time
+    // post-mount read here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stored) setSelectedIdState(stored);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -43,7 +59,7 @@ export default function ScorecardPage() {
       <h1 className="text-xl font-bold text-zinc-900">Scorecard</h1>
 
       <PlayerSwitcher />
-      <TeeTimeManager teeTimes={teeTimes} selectedId={selectedId} onSelect={setSelectedId} />
+      <TeeTimeManager teeTimes={teeTimes} selectedId={selectedId} onSelect={selectTeeTime} />
 
       {selected ? (
         <ScoreGrid teeTime={selected} />
