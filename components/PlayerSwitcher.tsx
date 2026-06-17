@@ -5,10 +5,8 @@ import { players } from "@/lib/players";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 
 export function PlayerSwitcher() {
-  const { player, setPlayer, loaded } = useCurrentPlayer();
+  const { player, setPlayer } = useCurrentPlayer();
   const [picking, setPicking] = useState(false);
-
-  if (!loaded) return null;
 
   if (!player || picking) {
     return (
