@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase, type ScoreRow, type HoleMvpRow, type TeeTime } from "@/lib/supabase/client";
 import { getCourse } from "@/lib/courses";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { type Entry, getEntries } from "@/lib/entries";
 
 type Props = {
   teeTime: TeeTime;
@@ -28,20 +29,6 @@ function toMvpMap(rows: HoleMvpRow[]): MvpMap {
     map[row.hole_number][row.team_name] = row.player_name;
   }
   return map;
-}
-
-type Entry = { key: string; label: string; sublabel?: string; owners: string[] };
-
-function getEntries(teeTime: TeeTime): Entry[] {
-  if (teeTime.format === "scramble" && teeTime.teams.length > 0) {
-    return teeTime.teams.map((t) => ({
-      key: t.name,
-      label: t.name,
-      sublabel: t.players.join(" & "),
-      owners: t.players,
-    }));
-  }
-  return teeTime.players.map((p) => ({ key: p, label: p, owners: [p] }));
 }
 
 export function ScoreGrid({ teeTime }: Props) {

@@ -38,3 +38,28 @@ export type HoleMvpRow = {
   player_name: string;
   updated_at: string;
 };
+
+export type NavDestination = {
+  id: number;
+  address: string;
+  updated_by: string | null;
+  updated_at: string;
+};
+
+export type ExpenseCategory = "green_fees" | "skins" | "trip";
+
+export type Expense = {
+  id: string;
+  description: string;
+  category: ExpenseCategory;
+  amount: number;
+  paid_by: string;
+  split_among: string[];
+  created_at: string;
+};
+
+export type PlayerVenmo = {
+  player_name: string;
+  venmo_username: string | null;
+  updated_at: string;
+};

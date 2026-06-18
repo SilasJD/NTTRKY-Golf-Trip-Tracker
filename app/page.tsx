@@ -1,3 +1,5 @@
+import { GlobalNavigate } from "@/components/GlobalNavigate";
+
 const sections = [
   {
     href: "/scorecard",
@@ -34,6 +36,7 @@ export default function Home() {
         <p className="mt-1 text-green-100">Utah · July 2026</p>
       </header>
       <main className="flex flex-1 flex-col gap-3 p-4">
+        <GlobalNavigate />
         {sections.map((section) => (
           <a
             key={section.href}
