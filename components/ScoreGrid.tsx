@@ -163,7 +163,7 @@ export function ScoreGrid({ teeTime }: Props) {
   }
 
   if (!course) return <p className="text-sm text-red-600">Unknown course.</p>;
-  if (loading) return <p className="text-sm text-zinc-400">Loading scorecard…</p>;
+  if (loading) return <p className="text-sm text-zinc-600">Loading scorecard…</p>;
 
   function total(key: string, holeNumbers?: number[]) {
     const holeScores = scores[key] ?? {};
@@ -279,16 +279,16 @@ export function ScoreGrid({ teeTime }: Props) {
       <table className="min-w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-200 bg-zinc-50">
-            <th className="px-3 py-2 text-left font-medium text-zinc-500">Hole</th>
-            <th className="px-3 py-2 text-left font-medium text-zinc-500">Par</th>
-            <th className="px-3 py-2 text-left font-medium text-zinc-500">Yds</th>
+            <th className="px-3 py-2 text-left font-medium text-zinc-600">Hole</th>
+            <th className="px-3 py-2 text-left font-medium text-zinc-600">Par</th>
+            <th className="px-3 py-2 text-left font-medium text-zinc-600">Yds</th>
             {entries.map((entry) => {
               const streak = currentStreak(entry.key);
               return (
                 <th
                   key={entry.key}
                   className={`px-3 py-2 text-left font-medium ${
-                    canEdit(entry) ? "text-green-700" : "text-zinc-500"
+                    canEdit(entry) ? "text-green-700" : "text-zinc-600"
                   }`}
                 >
                   <div>
@@ -299,7 +299,7 @@ export function ScoreGrid({ teeTime }: Props) {
                     )}
                   </div>
                   {entry.sublabel && (
-                    <div className="text-[10px] font-normal text-zinc-400">{entry.sublabel}</div>
+                    <div className="text-[10px] font-normal text-zinc-600">{entry.sublabel}</div>
                   )}
                 </th>
               );
@@ -310,8 +310,8 @@ export function ScoreGrid({ teeTime }: Props) {
           {visibleHoles.map((hole) => (
             <tr key={hole.number} className="border-b border-zinc-100">
               <td className="px-3 py-2 font-medium text-zinc-900">{hole.number}</td>
-              <td className="px-3 py-2 text-zinc-500">{hole.par}</td>
-              <td className="px-3 py-2 text-zinc-500">{hole.yards}</td>
+              <td className="px-3 py-2 text-zinc-600">{hole.par}</td>
+              <td className="px-3 py-2 text-zinc-600">{hole.yards}</td>
               {entries.map((entry) => {
                 const editable = canEdit(entry);
                 const value = scores[entry.key]?.[hole.number] ?? null;
@@ -319,7 +319,7 @@ export function ScoreGrid({ teeTime }: Props) {
                   ? scoreMarkClass(value, hole.par)
                   : editable
                     ? "rounded-md border-zinc-300 bg-white"
-                    : "rounded-md border-zinc-200 bg-zinc-50 text-zinc-400";
+                    : "rounded-md border-zinc-200 bg-zinc-50 text-zinc-600";
                 return (
                   <td key={entry.key} className="px-1.5 py-1.5">
                     <div className="flex flex-col items-center gap-1">
@@ -339,7 +339,7 @@ export function ScoreGrid({ teeTime }: Props) {
                         <select
                           value={mvp[hole.number]?.[entry.key] ?? ""}
                           onChange={(e) => setMvp(hole.number, entry.key, e.target.value)}
-                          className="w-12 rounded-md border border-zinc-200 bg-white px-0.5 py-0.5 text-[10px] text-zinc-500"
+                          className="w-12 rounded-md border border-zinc-200 bg-white px-0.5 py-0.5 text-[10px] text-zinc-600"
                         >
                           <option value="">MVP</option>
                           {entry.owners.map((p) => (

@@ -110,7 +110,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
 
       <div className="flex flex-col gap-2">
         {teeTimes.length === 0 && (
-          <p className="text-sm text-zinc-400">No tee times scheduled yet.</p>
+          <p className="text-sm text-zinc-600">No tee times scheduled yet.</p>
         )}
         {teeTimes.map((t) => {
           const course = courses.find((c) => c.slug === t.course_slug);
@@ -130,7 +130,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="text-xs text-zinc-500">
+                <div className="text-xs text-zinc-600">
                   {t.play_date} · {t.tee_time} ·{" "}
                   {t.format === "scramble"
                     ? t.teams.map((team) => `${team.name} (${team.players.join("/")})`).join(" · ")

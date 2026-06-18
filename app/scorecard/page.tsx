@@ -64,7 +64,7 @@ export default function ScorecardPage() {
       {selected ? (
         <ScoreGrid teeTime={selected} />
       ) : (
-        <p className="text-sm text-zinc-400">Select a tee time above to enter scores.</p>
+        <p className="text-sm text-zinc-600">Select a tee time above to enter scores.</p>
       )}
     </div>
   );

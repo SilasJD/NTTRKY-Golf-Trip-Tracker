@@ -103,7 +103,7 @@ export function ExpenseManager({ expenses }: Props) {
       </div>
 
       <div className="flex flex-col gap-2">
-        {expenses.length === 0 && <p className="text-sm text-zinc-400">No expenses logged yet.</p>}
+        {expenses.length === 0 && <p className="text-sm text-zinc-600">No expenses logged yet.</p>}
         {expenses.map((e) => (
           <div
             key={e.id}
@@ -112,11 +112,11 @@ export function ExpenseManager({ expenses }: Props) {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-zinc-900">{e.description}</span>
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-zinc-500">
+                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-zinc-700">
                   {categoryLabels[e.category]}
                 </span>
               </div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-zinc-600">
                 ${e.amount.toFixed(2)} · {e.paid_by} paid · split: {e.split_among.join(", ")}
               </div>
             </div>

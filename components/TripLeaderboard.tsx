@@ -60,13 +60,13 @@ export function TripLeaderboard({ teeTimes, scores }: Props) {
     <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
       <p className="mb-3 text-sm font-medium text-zinc-700">Trip Leaderboard</p>
       {standings.length === 0 ? (
-        <p className="text-sm text-zinc-400">No scores entered yet.</p>
+        <p className="text-sm text-zinc-600">No scores entered yet.</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {standings.map((s, i) => (
             <div key={s.player} className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
-                <span className="w-5 text-zinc-400">{i + 1}</span>
+                <span className="w-5 text-zinc-600">{i + 1}</span>
                 <span className="font-semibold text-zinc-900">{s.player}</span>
               </span>
               <span className="flex items-center gap-3 text-zinc-600">

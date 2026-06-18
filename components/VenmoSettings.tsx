@@ -40,7 +40,7 @@ export function VenmoSettings({ venmoMap }: Props) {
   if (editing) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-sm">
-        <span className="text-zinc-500">@</span>
+        <span className="text-zinc-600">@</span>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -54,7 +54,7 @@ export function VenmoSettings({ venmoMap }: Props) {
         >
           {saving ? "…" : "Save"}
         </button>
-        <button onClick={() => setEditing(false)} className="text-zinc-500">
+        <button onClick={() => setEditing(false)} className="text-zinc-600">
           Cancel
         </button>
       </div>
@@ -66,7 +66,7 @@ export function VenmoSettings({ venmoMap }: Props) {
       onClick={startEdit}
       className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm shadow-sm"
     >
-      <span className="text-zinc-500">
+      <span className="text-zinc-600">
         Your Venmo: <span className="font-semibold text-zinc-900">{myHandle ? `@${myHandle}` : "not set"}</span>
       </span>
       <span className="text-green-700">{myHandle ? "Edit" : "Set"}</span>

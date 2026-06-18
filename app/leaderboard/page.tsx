@@ -57,7 +57,7 @@ export default function LeaderboardPage() {
       <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
         <p className="mb-3 text-sm font-medium text-zinc-700">Rounds</p>
         <div className="flex flex-col gap-2">
-          {teeTimes.length === 0 && <p className="text-sm text-zinc-400">No tee times scheduled yet.</p>}
+          {teeTimes.length === 0 && <p className="text-sm text-zinc-600">No tee times scheduled yet.</p>}
           {teeTimes.map((t) => {
             const course = courses.find((c) => c.slug === t.course_slug);
             return (
@@ -69,7 +69,7 @@ export default function LeaderboardPage() {
                 }`}
               >
                 <div className="text-sm font-semibold text-zinc-900">{course?.name}</div>
-                <div className="text-xs text-zinc-500">
+                <div className="text-xs text-zinc-600">
                   {t.play_date} · {t.tee_time}
                 </div>
               </button>

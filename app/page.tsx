@@ -44,7 +44,7 @@ export default function Home() {
             className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 shadow-sm active:bg-zinc-100"
           >
             <span className="text-lg font-semibold text-zinc-900">{section.title}</span>
-            <span className="text-sm text-zinc-500">{section.description}</span>
+            <span className="text-sm text-zinc-600">{section.description}</span>
           </a>
         ))}
       </main>

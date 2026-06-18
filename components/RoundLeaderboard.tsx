@@ -52,10 +52,10 @@ export function RoundLeaderboard({ teeTime, scores }: Props) {
         {standings.map((s, i) => (
           <div key={s.entry.key} className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2">
-              <span className="w-5 text-zinc-400">{s.thru > 0 ? i + 1 : "–"}</span>
+              <span className="w-5 text-zinc-600">{s.thru > 0 ? i + 1 : "–"}</span>
               <span>
                 <span className="font-semibold text-zinc-900">{s.entry.label}</span>
-                {s.entry.sublabel && <span className="ml-1 text-xs text-zinc-400">({s.entry.sublabel})</span>}
+                {s.entry.sublabel && <span className="ml-1 text-xs text-zinc-600">({s.entry.sublabel})</span>}
               </span>
             </span>
             <span className="flex items-center gap-3 text-zinc-600">

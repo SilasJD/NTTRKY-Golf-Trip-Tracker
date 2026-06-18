@@ -75,7 +75,7 @@ export function GlobalNavigate() {
       )}
 
       {!address && !editing && (
-        <p className="text-sm text-zinc-400">No destination set yet.</p>
+        <p className="text-sm text-zinc-600">No destination set yet.</p>
       )}
 
       {editing ? (
@@ -111,7 +111,7 @@ export function GlobalNavigate() {
       )}
 
       {destination?.updated_by && !editing && (
-        <p className="text-[10px] text-zinc-400">Set by {destination.updated_by}</p>
+        <p className="text-[10px] text-zinc-600">Set by {destination.updated_by}</p>
       )}
     </div>
   );
