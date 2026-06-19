@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase, type Expense, type PlayerVenmo } from "@/lib/supabase/client";
+import { supabase, type Expense, type PlayerVenmo, type TeeTime, type ScoreRow, type SkinsSettings } from "@/lib/supabase/client";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { ExpenseManager } from "@/components/ExpenseManager";
 import { BalancesSummary } from "@/components/BalancesSummary";
@@ -11,6 +11,9 @@ import { VenmoSettings } from "@/components/VenmoSettings";
 export default function CostsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [venmoMap, setVenmoMap] = useState<Record<string, string>>({});
+  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
+  const [scores, setScores] = useState<ScoreRow[]>([]);
+  const [skinsSettings, setSkinsSettings] = useState<SkinsSettings | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -57,6 +60,40 @@ export default function CostsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    async function loadTeeTimes() {
+      const { data, error } = await supabase.from("tee_times").select("*");
+      if (error) console.error(error);
+      setTeeTimes(data ?? []);
+    }
+    loadTeeTimes();
+
+    async function loadScores() {
+      const { data, error } = await supabase.from("scores").select("*");
+      if (error) console.error(error);
+      setScores(data ?? []);
+    }
+    loadScores();
+
+    async function loadSkinsSettings() {
+      const { data, error } = await supabase.from("skins_settings").select("*").eq("id", 1).single();
+      if (error) console.error(error);
+      setSkinsSettings(data);
+    }
+    loadSkinsSettings();
+
+    const channel = supabase
+      .channel("costs-skins")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tee_times" }, loadTeeTimes)
+      .on("postgres_changes", { event: "*", schema: "public", table: "scores" }, loadScores)
+      .on("postgres_changes", { event: "*", schema: "public", table: "skins_settings" }, loadSkinsSettings)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
       <Link href="/" className="text-sm text-emerald-700">
@@ -66,7 +103,13 @@ export default function CostsPage() {
 
       <PlayerSwitcher />
       <VenmoSettings venmoMap={venmoMap} />
-      <BalancesSummary expenses={expenses} venmoMap={venmoMap} />
+      <BalancesSummary
+        expenses={expenses}
+        venmoMap={venmoMap}
+        teeTimes={teeTimes}
+        scores={scores}
+        skinsBuyIn={skinsSettings?.buy_in ?? 1}
+      />
       <ExpenseManager expenses={expenses} />
     </div>
   );

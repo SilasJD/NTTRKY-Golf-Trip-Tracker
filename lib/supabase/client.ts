@@ -71,3 +71,10 @@ export type PhotosLink = {
   updated_by: string | null;
   updated_at: string;
 };
+
+export type SkinsSettings = {
+  id: number;
+  buy_in: number;
+  updated_by: string | null;
+  updated_at: string;
+};

@@ -1,13 +1,16 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { type Expense } from "@/lib/supabase/client";
-import { computeBalances, simplifyDebts, totalPaidByPlayer } from "@/lib/balances";
+import { type Expense, type TeeTime, type ScoreRow } from "@/lib/supabase/client";
+import { computeBalances, computeSkinsBalances, mergeBalances, simplifyDebts, totalPaidByPlayer } from "@/lib/balances";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 
 type Props = {
   expenses: Expense[];
   venmoMap: Record<string, string>;
+  teeTimes: TeeTime[];
+  scores: ScoreRow[];
+  skinsBuyIn: number;
 };
 
 function venmoPayUrl(username: string | undefined, amount: number) {
@@ -36,10 +39,12 @@ function buildShareText(settlements: ReturnType<typeof simplifyDebts>) {
   );
 }
 
-export function BalancesSummary({ expenses, venmoMap }: Props) {
+export function BalancesSummary({ expenses, venmoMap, teeTimes, scores, skinsBuyIn }: Props) {
   const { player: currentPlayer } = useCurrentPlayer();
   const [copied, setCopied] = useState(false);
-  const balances = computeBalances(expenses);
+  const expenseBalances = computeBalances(expenses);
+  const skinsBalances = computeSkinsBalances(teeTimes, scores, skinsBuyIn);
+  const balances = mergeBalances(expenseBalances, skinsBalances);
   const settlements = simplifyDebts(balances);
   const shareText = buildShareText(settlements);
 
@@ -66,7 +71,10 @@ export function BalancesSummary({ expenses, venmoMap }: Props) {
   return (
     <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-700">Balances</p>
+        <div>
+          <p className="text-sm font-medium text-slate-700">Balances</p>
+          <p className="text-[10px] text-slate-500">Includes expenses + skins</p>
+        </div>
         <button
           onClick={share}
           className="rounded-lg border border-emerald-700 px-3 py-1.5 text-sm font-semibold text-emerald-700"
