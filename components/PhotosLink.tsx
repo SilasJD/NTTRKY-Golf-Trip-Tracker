@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { supabase, type PhotosLink as PhotosLinkRow } from "@/lib/supabase/client";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { notifySaveError } from "@/lib/toast";
 
 export function PhotosLink() {
   const { player: currentPlayer } = useCurrentPlayer();
@@ -15,7 +16,10 @@ export function PhotosLink() {
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase.from("photos_link").select("*").eq("id", 1).single();
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("photos link (couldn't load)", load);
+      }
       if (data) setLink(data);
     }
     load();
@@ -47,7 +51,12 @@ export function PhotosLink() {
       .from("photos_link")
       .update({ url: draft, updated_by: currentPlayer, updated_at: new Date().toISOString() })
       .eq("id", 1);
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("photos link", save);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setEditing(false);
   }

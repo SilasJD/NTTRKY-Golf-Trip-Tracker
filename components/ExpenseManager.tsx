@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase, type Expense, type ExpenseCategory } from "@/lib/supabase/client";
 import { players } from "@/lib/players";
+import { notifySaveError } from "@/lib/toast";
 
 type Props = {
   expenses: Expense[];
@@ -73,21 +74,37 @@ export function ExpenseManager({ expenses }: Props) {
       paid_by: draft.paid_by,
       split_among: draft.split_among,
     };
+    let ok = true;
     if (editingId) {
       const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("expense", save);
+        ok = false;
+      }
     } else {
       const { error } = await supabase.from("expenses").insert(payload);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("expense", save);
+        ok = false;
+      }
     }
     setSaving(false);
-    setOpen(false);
+    if (ok) setOpen(false);
   }
 
-  async function remove(id: string) {
-    if (!confirm("Delete this expense?")) return;
+  async function doRemove(id: string) {
     const { error } = await supabase.from("expenses").delete().eq("id", id);
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("expense deletion", () => doRemove(id));
+    }
+  }
+
+  function remove(id: string) {
+    if (!confirm("Delete this expense?")) return;
+    doRemove(id);
   }
 
   return (

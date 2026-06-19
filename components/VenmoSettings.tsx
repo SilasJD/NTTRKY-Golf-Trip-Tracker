@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { notifySaveError } from "@/lib/toast";
 
 type Props = {
   venmoMap: Record<string, string>;
@@ -32,7 +33,12 @@ export function VenmoSettings({ venmoMap }: Props) {
         { player_name: currentPlayer, venmo_username: cleaned, updated_at: new Date().toISOString() },
         { onConflict: "player_name" }
       );
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("Venmo handle", save);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setEditing(false);
   }

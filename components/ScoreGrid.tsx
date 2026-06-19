@@ -5,8 +5,10 @@ import { ChevronRight } from "lucide-react";
 import { supabase, type ScoreRow, type HoleMvpRow, type TeeTime } from "@/lib/supabase/client";
 import { getCourse } from "@/lib/courses";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
+import { isAdminPlayer } from "@/lib/players";
 import { type Entry, getEntries } from "@/lib/entries";
 import { HoleDetailSheet } from "@/components/HoleDetailSheet";
+import { notifySaveError } from "@/lib/toast";
 
 type Props = {
   teeTime: TeeTime;
@@ -55,6 +57,13 @@ export function ScoreGrid({ teeTime }: Props) {
   const [selectedHoleNumber, setSelectedHoleNumber] = useState<number | null>(null);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const toastId = useRef(0);
+  const inputRefs = useRef(new Map<string, HTMLInputElement>());
+  const pendingFocusRef = useRef<string | null>(null);
+  const advanceTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+
+  function cellKey(holeNumber: number, entryKey: string) {
+    return `${holeNumber}::${entryKey}`;
+  }
 
   function addToast(text: string) {
     const id = ++toastId.current;
@@ -71,8 +80,14 @@ export function ScoreGrid({ teeTime }: Props) {
         supabase.from("hole_mvp").select("*").eq("tee_time_id", teeTime.id),
       ]);
       if (!active) return;
-      if (scoresRes.error) console.error(scoresRes.error);
-      if (mvpRes.error) console.error(mvpRes.error);
+      if (scoresRes.error) {
+        console.error(scoresRes.error);
+        notifySaveError("scores (couldn't load)", () => load());
+      }
+      if (mvpRes.error) {
+        console.error(mvpRes.error);
+        notifySaveError("hole MVPs (couldn't load)", () => load());
+      }
       setScores(toScoreMap(scoresRes.data ?? []));
       setPuttsMap(toPuttsMap(scoresRes.data ?? []));
       setMvpMap(toMvpMap(mvpRes.data ?? []));
@@ -144,6 +159,17 @@ export function ScoreGrid({ teeTime }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teeTime.id]);
 
+  useEffect(() => {
+    const key = pendingFocusRef.current;
+    if (!key) return;
+    pendingFocusRef.current = null;
+    const input = inputRefs.current.get(key);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }, [half]);
+
   async function setScore(player: string, hole: number, value: string) {
     const strokes = value === "" ? null : Number(value);
     setScores((prev) => ({
@@ -156,7 +182,10 @@ export function ScoreGrid({ teeTime }: Props) {
         { tee_time_id: teeTime.id, player_name: player, hole_number: hole, strokes },
         { onConflict: "tee_time_id,player_name,hole_number" }
       );
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError(`hole ${hole} score`, () => setScore(player, hole, value));
+    }
   }
 
   async function setPutts(player: string, hole: number, value: string) {
@@ -171,7 +200,10 @@ export function ScoreGrid({ teeTime }: Props) {
         { tee_time_id: teeTime.id, player_name: player, hole_number: hole, putts: puttCount },
         { onConflict: "tee_time_id,player_name,hole_number" }
       );
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError(`hole ${hole} putts`, () => setPutts(player, hole, value));
+    }
   }
 
   async function setMvp(hole: number, teamName: string, playerName: string) {
@@ -188,7 +220,10 @@ export function ScoreGrid({ teeTime }: Props) {
         .eq("tee_time_id", teeTime.id)
         .eq("hole_number", hole)
         .eq("team_name", teamName);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("hole MVP", () => setMvp(hole, teamName, playerName));
+      }
       return;
     }
     const { error } = await supabase
@@ -197,7 +232,10 @@ export function ScoreGrid({ teeTime }: Props) {
         { tee_time_id: teeTime.id, hole_number: hole, team_name: teamName, player_name: playerName },
         { onConflict: "tee_time_id,hole_number,team_name" }
       );
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("hole MVP", () => setMvp(hole, teamName, playerName));
+    }
   }
 
   if (!course) return <p className="text-sm text-red-600">Unknown course.</p>;
@@ -210,7 +248,50 @@ export function ScoreGrid({ teeTime }: Props) {
   }
 
   function canEdit(entry: Entry) {
-    return currentPlayer !== null && entry.owners.includes(currentPlayer);
+    if (currentPlayer === null) return false;
+    if (isAdminPlayer(currentPlayer)) return true;
+    return entry.owners.includes(currentPlayer);
+  }
+
+  const editableOrder = course.holes.flatMap((hole) =>
+    entries.filter((entry) => canEdit(entry)).map((entry) => ({ hole: hole.number, key: entry.key }))
+  );
+
+  function focusCell(holeNumber: number, entryKey: string) {
+    const key = cellKey(holeNumber, entryKey);
+    const targetHalf: "front" | "back" = holeNumber <= 9 ? "front" : "back";
+    if (targetHalf !== half) {
+      pendingFocusRef.current = key;
+      setHalf(targetHalf);
+      return;
+    }
+    const input = inputRefs.current.get(key);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
+
+  function advanceFrom(holeNumber: number, entryKey: string) {
+    const idx = editableOrder.findIndex((c) => c.hole === holeNumber && c.key === entryKey);
+    const next = idx >= 0 ? editableOrder[idx + 1] : undefined;
+    if (next) focusCell(next.hole, next.key);
+  }
+
+  function scheduleAdvance(holeNumber: number, entryKey: string, value: string) {
+    const timerKey = cellKey(holeNumber, entryKey);
+    const existing = advanceTimers.current.get(timerKey);
+    if (existing) clearTimeout(existing);
+    if (value === "") return;
+    if (value === "1") {
+      const timer = setTimeout(() => {
+        advanceTimers.current.delete(timerKey);
+        advanceFrom(holeNumber, entryKey);
+      }, 450);
+      advanceTimers.current.set(timerKey, timer);
+      return;
+    }
+    advanceFrom(holeNumber, entryKey);
   }
 
   function relativeToPar(key: string) {
@@ -371,13 +452,22 @@ export function ScoreGrid({ teeTime }: Props) {
                 return (
                   <td key={entry.key} className="px-1.5 py-1.5">
                     <input
+                      ref={(el) => {
+                        const key = cellKey(hole.number, entry.key);
+                        if (el) inputRefs.current.set(key, el);
+                        else inputRefs.current.delete(key);
+                      }}
                       type="number"
                       inputMode="numeric"
                       min={1}
                       max={15}
                       disabled={!editable}
                       value={value ?? ""}
-                      onChange={(e) => setScore(entry.key, hole.number, e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        setScore(entry.key, hole.number, e.target.value);
+                        scheduleAdvance(hole.number, entry.key, e.target.value);
+                      }}
                       className={`h-9 w-9 border-2 p-0 text-center text-sm transition-colors ${markClass} ${
                         !editable && value == null ? "text-slate-400" : ""
                       }`}

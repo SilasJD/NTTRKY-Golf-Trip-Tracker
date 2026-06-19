@@ -5,6 +5,7 @@ import { Navigation } from "lucide-react";
 import { supabase, type NavDestination } from "@/lib/supabase/client";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
+import { notifySaveError } from "@/lib/toast";
 
 function mapsUrl(address: string) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
@@ -20,7 +21,10 @@ export function GlobalNavigate() {
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase.from("nav_destination").select("*").eq("id", 1).single();
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("destination (couldn't load)", load);
+      }
       if (data) setDestination(data);
     }
     load();
@@ -52,7 +56,12 @@ export function GlobalNavigate() {
       .from("nav_destination")
       .update({ address: draft, updated_by: currentPlayer, updated_at: new Date().toISOString() })
       .eq("id", 1);
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("destination", save);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setEditing(false);
   }

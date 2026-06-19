@@ -5,6 +5,7 @@ import { supabase, type TeeTime, type Team } from "@/lib/supabase/client";
 import { courses } from "@/lib/courses";
 import { players } from "@/lib/players";
 import { TeamBuilder, validateTeams } from "@/components/TeamBuilder";
+import { notifySaveError } from "@/lib/toast";
 
 type Props = {
   teeTimes: TeeTime[];
@@ -78,22 +79,38 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
     }
     setSaving(true);
     const payload = { ...draft, teams: draft.format === "scramble" ? draft.teams : [] };
+    let ok = true;
     if (editingId) {
       const { error } = await supabase.from("tee_times").update(payload).eq("id", editingId);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("tee time", save);
+        ok = false;
+      }
     } else {
       const { data, error } = await supabase.from("tee_times").insert(payload).select().single();
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        notifySaveError("tee time", save);
+        ok = false;
+      }
       if (data) onSelect(data.id);
     }
     setSaving(false);
-    setOpen(false);
+    if (ok) setOpen(false);
   }
 
-  async function remove(id: string) {
-    if (!confirm("Delete this tee time and its scores?")) return;
+  async function doRemove(id: string) {
     const { error } = await supabase.from("tee_times").delete().eq("id", id);
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      notifySaveError("tee time deletion", () => doRemove(id));
+    }
+  }
+
+  function remove(id: string) {
+    if (!confirm("Delete this tee time and its scores?")) return;
+    doRemove(id);
   }
 
   return (
