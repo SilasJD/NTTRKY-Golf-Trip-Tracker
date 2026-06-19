@@ -1,38 +1,58 @@
-﻿import { Flag, Trophy, Target, DollarSign, Award, ChevronRight } from "lucide-react";
+import { Flag, Trophy, Target, DollarSign, Award, CalendarDays, Dices } from "lucide-react";
 import { GlobalNavigate } from "@/components/GlobalNavigate";
 import { PhotosLink } from "@/components/PhotosLink";
 import { MountainSkyline } from "@/components/MountainSkyline";
+import { TripCountdown } from "@/components/TripCountdown";
 
 const sections = [
+  {
+    href: "/itinerary",
+    icon: CalendarDays,
+    title: "Itinerary",
+    tile: "bg-sky-100",
+    badge: "bg-sky-600",
+  },
   {
     href: "/scorecard",
     icon: Flag,
     title: "Scorecard",
-    description: "Hole-by-hole score entry for the round",
+    tile: "bg-emerald-100",
+    badge: "bg-emerald-600",
   },
   {
     href: "/leaderboard",
     icon: Trophy,
     title: "Leaderboard",
-    description: "Live round standings and trip totals",
+    tile: "bg-amber-100",
+    badge: "bg-amber-500",
   },
   {
     href: "/skins",
     icon: Target,
     title: "Skins",
-    description: "Skins won and money on the line",
+    tile: "bg-violet-100",
+    badge: "bg-violet-600",
+  },
+  {
+    href: "/side-bets",
+    icon: Dices,
+    title: "Side Bets",
+    tile: "bg-rose-100",
+    badge: "bg-rose-500",
   },
   {
     href: "/costs",
     icon: DollarSign,
     title: "Costs",
-    description: "Green fees, side bets, and trip expenses",
+    tile: "bg-blue-100",
+    badge: "bg-blue-600",
   },
   {
     href: "/awards",
     icon: Award,
     title: "Awards",
-    description: "End-of-round stats and trash talk",
+    tile: "bg-orange-100",
+    badge: "bg-orange-500",
   },
 ];
 
@@ -47,27 +67,28 @@ export default function Home() {
         </div>
       </header>
       <main className="flex flex-1 flex-col gap-3 p-4">
+        <TripCountdown />
         <GlobalNavigate />
         <PhotosLink />
-        {sections.map((section) => {
-          const Icon = section.icon;
-          return (
-            <a
-              key={section.href}
-              href={section.href}
-              className="flex items-center gap-3 rounded-2xl bg-slate-100 p-4 shadow-sm transition active:bg-slate-200"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-700">
-                <Icon size={20} strokeWidth={2} />
-              </span>
-              <span className="flex flex-1 flex-col">
-                <span className="text-base font-semibold text-slate-900">{section.title}</span>
-                <span className="text-sm text-slate-600">{section.description}</span>
-              </span>
-              <ChevronRight size={18} className="text-slate-600" />
-            </a>
-          );
-        })}
+        <div className="grid grid-cols-2 gap-3">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <a
+                key={section.href}
+                href={section.href}
+                className={`flex aspect-square flex-col items-center justify-center gap-2.5 rounded-2xl p-3 shadow-md transition active:scale-95 ${section.tile}`}
+              >
+                <span
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg ${section.badge}`}
+                >
+                  <Icon size={28} strokeWidth={2.25} />
+                </span>
+                <span className="text-sm font-semibold text-slate-900">{section.title}</span>
+              </a>
+            );
+          })}
+        </div>
       </main>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase, type Expense, type PlayerVenmo, type TeeTime, type ScoreRow, type SkinsSettings } from "@/lib/supabase/client";
+import { supabase, type Expense, type PlayerVenmo, type TeeTime, type ScoreRow, type SkinsSettings, type SideBet } from "@/lib/supabase/client";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { ExpenseManager } from "@/components/ExpenseManager";
 import { BalancesSummary } from "@/components/BalancesSummary";
@@ -14,6 +14,7 @@ export default function CostsPage() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [skinsSettings, setSkinsSettings] = useState<SkinsSettings | null>(null);
+  const [sideBets, setSideBets] = useState<SideBet[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -82,11 +83,19 @@ export default function CostsPage() {
     }
     loadSkinsSettings();
 
+    async function loadSideBets() {
+      const { data, error } = await supabase.from("side_bets").select("*");
+      if (error) console.error(error);
+      setSideBets(data ?? []);
+    }
+    loadSideBets();
+
     const channel = supabase
       .channel("costs-skins")
       .on("postgres_changes", { event: "*", schema: "public", table: "tee_times" }, loadTeeTimes)
       .on("postgres_changes", { event: "*", schema: "public", table: "scores" }, loadScores)
       .on("postgres_changes", { event: "*", schema: "public", table: "skins_settings" }, loadSkinsSettings)
+      .on("postgres_changes", { event: "*", schema: "public", table: "side_bets" }, loadSideBets)
       .subscribe();
 
     return () => {
@@ -109,6 +118,7 @@ export default function CostsPage() {
         teeTimes={teeTimes}
         scores={scores}
         skinsBuyIn={skinsSettings?.buy_in ?? 1}
+        sideBets={sideBets}
       />
       <ExpenseManager expenses={expenses} />
     </div>

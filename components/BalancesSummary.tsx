@@ -1,8 +1,9 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { type Expense, type TeeTime, type ScoreRow } from "@/lib/supabase/client";
+import { type Expense, type TeeTime, type ScoreRow, type SideBet } from "@/lib/supabase/client";
 import { computeBalances, computeSkinsBalances, mergeBalances, simplifyDebts, totalPaidByPlayer } from "@/lib/balances";
+import { computeSideBetBalances } from "@/lib/sideBets";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
   teeTimes: TeeTime[];
   scores: ScoreRow[];
   skinsBuyIn: number;
+  sideBets: SideBet[];
 };
 
 function venmoPayUrl(username: string | undefined, amount: number) {
@@ -39,12 +41,13 @@ function buildShareText(settlements: ReturnType<typeof simplifyDebts>) {
   );
 }
 
-export function BalancesSummary({ expenses, venmoMap, teeTimes, scores, skinsBuyIn }: Props) {
+export function BalancesSummary({ expenses, venmoMap, teeTimes, scores, skinsBuyIn, sideBets }: Props) {
   const { player: currentPlayer } = useCurrentPlayer();
   const [copied, setCopied] = useState(false);
   const expenseBalances = computeBalances(expenses);
   const skinsBalances = computeSkinsBalances(teeTimes, scores, skinsBuyIn);
-  const balances = mergeBalances(expenseBalances, skinsBalances);
+  const sideBetBalances = computeSideBetBalances(sideBets);
+  const balances = mergeBalances(expenseBalances, skinsBalances, sideBetBalances);
   const settlements = simplifyDebts(balances);
   const shareText = buildShareText(settlements);
 
@@ -73,7 +76,7 @@ export function BalancesSummary({ expenses, venmoMap, teeTimes, scores, skinsBuy
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-700">Balances</p>
-          <p className="text-[10px] text-slate-500">Includes expenses + skins</p>
+          <p className="text-[10px] text-slate-500">Includes expenses, skins, and side bets</p>
         </div>
         <button
           onClick={share}

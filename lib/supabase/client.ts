@@ -78,3 +78,13 @@ export type SkinsSettings = {
   updated_by: string | null;
   updated_at: string;
 };
+
+export type SideBet = {
+  id: string;
+  title: string;
+  amount: number;
+  participants: string[];
+  winner: string | null;
+  created_by: string | null;
+  created_at: string;
+};
