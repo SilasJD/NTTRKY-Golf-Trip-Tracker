@@ -27,6 +27,7 @@ export type ScoreRow = {
   player_name: string;
   hole_number: number;
   strokes: number | null;
+  putts: number | null;
   updated_at: string;
 };
 
@@ -61,5 +62,12 @@ export type Expense = {
 export type PlayerVenmo = {
   player_name: string;
   venmo_username: string | null;
+  updated_at: string;
+};
+
+export type PhotosLink = {
+  id: number;
+  url: string;
+  updated_by: string | null;
   updated_at: string;
 };

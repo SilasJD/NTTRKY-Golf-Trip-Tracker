@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type ScoreRow, type TeeTime } from "@/lib/supabase/client";
 import { getCourse } from "@/lib/courses";
@@ -57,22 +57,22 @@ export function TripLeaderboard({ teeTimes, scores }: Props) {
     .sort((a, b) => a.rel - b.rel);
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-sm font-medium text-zinc-700">Trip Leaderboard</p>
+    <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
+      <p className="mb-3 text-sm font-medium text-slate-700">Trip Leaderboard</p>
       {standings.length === 0 ? (
-        <p className="text-sm text-zinc-600">No scores entered yet.</p>
+        <p className="text-sm text-slate-600">No scores entered yet.</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {standings.map((s, i) => (
             <div key={s.player} className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
-                <span className="w-5 text-zinc-600">{i + 1}</span>
-                <span className="font-semibold text-zinc-900">{s.player}</span>
+                <span className="w-5 text-slate-600">{i + 1}</span>
+                <span className="font-semibold text-slate-900">{s.player}</span>
               </span>
-              <span className="flex items-center gap-3 text-zinc-600">
+              <span className="flex items-center gap-3 text-slate-600">
                 <span className="text-xs">{s.rounds} rd{s.rounds === 1 ? "" : "s"}</span>
-                <span className="w-10 text-right font-semibold text-zinc-900">{s.strokes}</span>
-                <span className="w-8 text-right font-semibold text-green-700">{formatToPar(s.rel)}</span>
+                <span className="w-10 text-right font-semibold text-slate-900">{s.strokes}</span>
+                <span className="w-8 text-right font-semibold text-emerald-700">{formatToPar(s.rel)}</span>
               </span>
             </div>
           ))}

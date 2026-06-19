@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
+import { Navigation } from "lucide-react";
 import { supabase, type NavDestination } from "@/lib/supabase/client";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
@@ -59,7 +60,7 @@ export function GlobalNavigate() {
   const address = destination?.address ?? "";
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl bg-slate-100 p-4 shadow-sm">
       <PlayerSwitcher />
 
       {address && !editing && (
@@ -67,15 +68,18 @@ export function GlobalNavigate() {
           href={mapsUrl(address)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-col items-center rounded-lg bg-green-700 px-4 py-3 text-center text-white active:bg-green-800"
+          className="flex flex-col items-center gap-0.5 rounded-lg bg-emerald-700 px-4 py-3 text-center text-white active:bg-emerald-800"
         >
-          <span className="text-base font-semibold">🧭 Navigate</span>
-          <span className="text-xs text-green-100">{address}</span>
+          <span className="flex items-center gap-1.5 text-base font-semibold">
+            <Navigation size={16} strokeWidth={2.25} />
+            Navigate
+          </span>
+          <span className="text-xs text-emerald-100">{address}</span>
         </a>
       )}
 
       {!address && !editing && (
-        <p className="text-sm text-zinc-600">No destination set yet.</p>
+        <p className="text-sm text-slate-600">No destination set yet.</p>
       )}
 
       {editing ? (
@@ -84,19 +88,19 @@ export function GlobalNavigate() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Course, hotel, restaurant address…"
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <div className="flex gap-2">
             <button
               onClick={save}
               disabled={saving}
-              className="flex-1 rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
             >
               Cancel
             </button>
@@ -104,14 +108,14 @@ export function GlobalNavigate() {
         </div>
       ) : (
         currentPlayer && (
-          <button onClick={startEdit} className="text-xs text-green-700">
+          <button onClick={startEdit} className="text-xs text-emerald-700">
             {address ? "Update destination" : "Set destination"}
           </button>
         )
       )}
 
       {destination?.updated_by && !editing && (
-        <p className="text-[10px] text-zinc-600">Set by {destination.updated_by}</p>
+        <p className="text-[10px] text-slate-600">Set by {destination.updated_by}</p>
       )}
     </div>
   );

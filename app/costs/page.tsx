@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -58,11 +58,11 @@ export default function CostsPage() {
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col gap-4 bg-zinc-50 p-4">
-      <Link href="/" className="text-sm text-green-700">
+    <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
+      <Link href="/" className="text-sm text-emerald-700">
         ← Home
       </Link>
-      <h1 className="text-xl font-bold text-zinc-900">Costs</h1>
+      <h1 className="text-xl font-bold text-slate-900">Costs</h1>
 
       <PlayerSwitcher />
       <VenmoSettings venmoMap={venmoMap} />

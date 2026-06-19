@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { supabase, type ScoreRow, type HoleMvpRow, type TeeTime } from "@/lib/supabase/client";
 import { getCourse } from "@/lib/courses";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { type Entry, getEntries } from "@/lib/entries";
+import { HoleDetailSheet } from "@/components/HoleDetailSheet";
 
 type Props = {
   teeTime: TeeTime;
@@ -18,6 +20,15 @@ function toScoreMap(rows: ScoreRow[]): ScoreMap {
   for (const row of rows) {
     map[row.player_name] ??= {};
     map[row.player_name][row.hole_number] = row.strokes;
+  }
+  return map;
+}
+
+function toPuttsMap(rows: ScoreRow[]): ScoreMap {
+  const map: ScoreMap = {};
+  for (const row of rows) {
+    map[row.player_name] ??= {};
+    map[row.player_name][row.hole_number] = row.putts;
   }
   return map;
 }
@@ -37,9 +48,11 @@ export function ScoreGrid({ teeTime }: Props) {
   const isScramble = teeTime.format === "scramble" && teeTime.teams.length > 0;
   const { player: currentPlayer } = useCurrentPlayer();
   const [scores, setScores] = useState<ScoreMap>({});
+  const [putts, setPuttsMap] = useState<ScoreMap>({});
   const [mvp, setMvpMap] = useState<MvpMap>({});
   const [loading, setLoading] = useState(true);
   const [half, setHalf] = useState<"front" | "back">("front");
+  const [selectedHoleNumber, setSelectedHoleNumber] = useState<number | null>(null);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const toastId = useRef(0);
 
@@ -61,6 +74,7 @@ export function ScoreGrid({ teeTime }: Props) {
       if (scoresRes.error) console.error(scoresRes.error);
       if (mvpRes.error) console.error(mvpRes.error);
       setScores(toScoreMap(scoresRes.data ?? []));
+      setPuttsMap(toPuttsMap(scoresRes.data ?? []));
       setMvpMap(toMvpMap(mvpRes.data ?? []));
       setLoading(false);
     }
@@ -79,6 +93,15 @@ export function ScoreGrid({ teeTime }: Props) {
               delete next[row.player_name][row.hole_number];
             } else {
               next[row.player_name][row.hole_number] = row.strokes;
+            }
+            return next;
+          });
+          setPuttsMap((prev) => {
+            const next = { ...prev, [row.player_name]: { ...prev[row.player_name] } };
+            if (payload.eventType === "DELETE") {
+              delete next[row.player_name][row.hole_number];
+            } else {
+              next[row.player_name][row.hole_number] = row.putts;
             }
             return next;
           });
@@ -136,6 +159,21 @@ export function ScoreGrid({ teeTime }: Props) {
     if (error) console.error(error);
   }
 
+  async function setPutts(player: string, hole: number, value: string) {
+    const puttCount = value === "" ? null : Number(value);
+    setPuttsMap((prev) => ({
+      ...prev,
+      [player]: { ...prev[player], [hole]: puttCount },
+    }));
+    const { error } = await supabase
+      .from("scores")
+      .upsert(
+        { tee_time_id: teeTime.id, player_name: player, hole_number: hole, putts: puttCount },
+        { onConflict: "tee_time_id,player_name,hole_number" }
+      );
+    if (error) console.error(error);
+  }
+
   async function setMvp(hole: number, teamName: string, playerName: string) {
     setMvpMap((prev) => {
       const next = { ...prev, [hole]: { ...prev[hole] } };
@@ -163,7 +201,7 @@ export function ScoreGrid({ teeTime }: Props) {
   }
 
   if (!course) return <p className="text-sm text-red-600">Unknown course.</p>;
-  if (loading) return <p className="text-sm text-zinc-600">Loading scorecard…</p>;
+  if (loading) return <p className="text-sm text-slate-600">Loading scorecard…</p>;
 
   function total(key: string, holeNumbers?: number[]) {
     const holeScores = scores[key] ?? {};
@@ -206,21 +244,21 @@ export function ScoreGrid({ teeTime }: Props) {
   }
 
   function scoreMarkClass(strokes: number | null, par: number) {
-    if (strokes == null) return "rounded-md border-zinc-300 bg-white";
+    if (strokes == null) return "rounded-lg border-slate-300 bg-white";
     const diff = strokes - par;
     if (diff <= -2) {
       return "rounded-full border-2 border-amber-600 ring-2 ring-amber-600 ring-offset-1 bg-amber-100 text-amber-900 font-bold";
     }
     if (diff === -1) {
-      return "rounded-full border-2 border-green-700 bg-green-100 text-green-900 font-semibold";
+      return "rounded-full border-2 border-emerald-700 bg-emerald-100 text-emerald-900 font-semibold";
     }
     if (diff === 0) {
-      return "rounded-md border-zinc-300 bg-white text-zinc-900";
+      return "rounded-lg border-slate-300 bg-white text-slate-900";
     }
     if (diff === 1) {
-      return "rounded-none border-2 border-orange-600 bg-orange-100 text-orange-900";
+      return "rounded-md border-2 border-orange-600 bg-orange-100 text-orange-900";
     }
-    return "rounded-none border-2 border-red-700 ring-2 ring-red-700 ring-offset-1 bg-red-100 text-red-900 font-bold";
+    return "rounded-md border-2 border-red-700 ring-2 ring-red-700 ring-offset-1 bg-red-100 text-red-900 font-bold";
   }
 
   const visibleHoles = half === "front" ? course.holes.slice(0, 9) : course.holes.slice(9);
@@ -239,13 +277,15 @@ export function ScoreGrid({ teeTime }: Props) {
   const minRel = playedStandings.length > 0 ? Math.min(...playedStandings.map((s) => s.rel)) : null;
   const leaderKeys = new Set(playedStandings.filter((s) => s.rel === minRel).map((s) => s.key));
 
+  const selectedHole = course.holes.find((h) => h.number === selectedHoleNumber) ?? null;
+
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl bg-slate-100 shadow-sm">
       <div className="pointer-events-none fixed inset-x-0 top-2 z-50 flex flex-col items-center gap-2 px-4">
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-lg"
+            className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-lg"
           >
             {t.text}
           </div>
@@ -257,19 +297,19 @@ export function ScoreGrid({ teeTime }: Props) {
         </p>
       )}
 
-      <div className="flex gap-2 border-b border-zinc-200 p-2">
+      <div className="flex gap-2 border-b border-slate-200 p-2">
         <button
           onClick={() => setHalf("front")}
-          className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium ${
-            half === "front" ? "bg-green-700 text-white" : "bg-zinc-100 text-zinc-600"
+          className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            half === "front" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-600"
           }`}
         >
           Front 9
         </button>
         <button
           onClick={() => setHalf("back")}
-          className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium ${
-            half === "back" ? "bg-green-700 text-white" : "bg-zinc-100 text-zinc-600"
+          className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            half === "back" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-600"
           }`}
         >
           Back 9
@@ -278,17 +318,17 @@ export function ScoreGrid({ teeTime }: Props) {
 
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 bg-zinc-50">
-            <th className="px-3 py-2 text-left font-medium text-zinc-600">Hole</th>
-            <th className="px-3 py-2 text-left font-medium text-zinc-600">Par</th>
-            <th className="px-3 py-2 text-left font-medium text-zinc-600">Yds</th>
+          <tr className="border-b border-slate-200 bg-slate-50">
+            <th className="px-3 py-2.5 text-left font-medium text-slate-500">Hole</th>
+            <th className="px-3 py-2.5 text-left font-medium text-slate-500">Par</th>
+            <th className="px-3 py-2.5 text-left font-medium text-slate-500">Yds</th>
             {entries.map((entry) => {
               const streak = currentStreak(entry.key);
               return (
                 <th
                   key={entry.key}
-                  className={`px-3 py-2 text-left font-medium ${
-                    canEdit(entry) ? "text-green-700" : "text-zinc-600"
+                  className={`px-3 py-2.5 text-left font-medium ${
+                    canEdit(entry) ? "text-emerald-700" : "text-slate-500"
                   }`}
                 >
                   <div>
@@ -299,7 +339,7 @@ export function ScoreGrid({ teeTime }: Props) {
                     )}
                   </div>
                   {entry.sublabel && (
-                    <div className="text-[10px] font-normal text-zinc-600">{entry.sublabel}</div>
+                    <div className="text-[10px] font-normal text-slate-500">{entry.sublabel}</div>
                   )}
                 </th>
               );
@@ -308,74 +348,66 @@ export function ScoreGrid({ teeTime }: Props) {
         </thead>
         <tbody>
           {visibleHoles.map((hole) => (
-            <tr key={hole.number} className="border-b border-zinc-100">
-              <td className="px-3 py-2 font-medium text-zinc-900">{hole.number}</td>
-              <td className="px-3 py-2 text-zinc-600">{hole.par}</td>
-              <td className="px-3 py-2 text-zinc-600">{hole.yards}</td>
+            <tr key={hole.number} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
+              <td className="p-1.5">
+                <button
+                  onClick={() => setSelectedHoleNumber(hole.number)}
+                  className="flex items-center gap-0.5 rounded-lg bg-emerald-50 px-2 py-1.5 font-semibold text-emerald-800 ring-1 ring-emerald-200 transition-colors active:bg-emerald-100"
+                >
+                  {hole.number}
+                  <ChevronRight size={16} strokeWidth={2.5} className="text-emerald-600" />
+                </button>
+              </td>
+              <td className="px-3 py-2.5 text-slate-500">{hole.par}</td>
+              <td className="px-3 py-2.5 text-slate-500">{hole.yards}</td>
               {entries.map((entry) => {
                 const editable = canEdit(entry);
                 const value = scores[entry.key]?.[hole.number] ?? null;
                 const markClass = isScramble
                   ? scoreMarkClass(value, hole.par)
                   : editable
-                    ? "rounded-md border-zinc-300 bg-white"
-                    : "rounded-md border-zinc-200 bg-zinc-50 text-zinc-600";
+                    ? "rounded-lg border-slate-300 bg-white"
+                    : "rounded-lg border-slate-200 bg-slate-50 text-slate-500";
                 return (
                   <td key={entry.key} className="px-1.5 py-1.5">
-                    <div className="flex flex-col items-center gap-1">
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        max={15}
-                        disabled={!editable}
-                        value={value ?? ""}
-                        onChange={(e) => setScore(entry.key, hole.number, e.target.value)}
-                        className={`h-9 w-9 border-2 p-0 text-center text-sm ${markClass} ${
-                          !editable && value == null ? "text-zinc-400" : ""
-                        }`}
-                      />
-                      {isScramble && (
-                        <select
-                          value={mvp[hole.number]?.[entry.key] ?? ""}
-                          onChange={(e) => setMvp(hole.number, entry.key, e.target.value)}
-                          className="w-12 rounded-md border border-zinc-200 bg-white px-0.5 py-0.5 text-[10px] text-zinc-600"
-                        >
-                          <option value="">MVP</option>
-                          {entry.owners.map((p) => (
-                            <option key={p} value={p}>
-                              {p}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={15}
+                      disabled={!editable}
+                      value={value ?? ""}
+                      onChange={(e) => setScore(entry.key, hole.number, e.target.value)}
+                      className={`h-9 w-9 border-2 p-0 text-center text-sm transition-colors ${markClass} ${
+                        !editable && value == null ? "text-slate-400" : ""
+                      }`}
+                    />
                   </td>
                 );
               })}
             </tr>
           ))}
-          <tr className="bg-zinc-50 font-semibold text-zinc-900">
-            <td className="px-3 py-2">{subtotalLabel}</td>
-            <td className="px-3 py-2">{visiblePar}</td>
-            <td className="px-3 py-2"></td>
+          <tr className="bg-slate-200 font-semibold text-slate-900">
+            <td className="px-3 py-2.5">{subtotalLabel}</td>
+            <td className="px-3 py-2.5">{visiblePar}</td>
+            <td className="px-3 py-2.5"></td>
             {entries.map((entry) => (
-              <td key={entry.key} className="px-3 py-2">
+              <td key={entry.key} className="px-3 py-2.5">
                 {total(entry.key, visibleNumbers)}
               </td>
             ))}
           </tr>
-          <tr className="bg-zinc-100 font-semibold text-zinc-900">
-            <td className="px-3 py-2">Total</td>
-            <td className="px-3 py-2">{course.par}</td>
-            <td className="px-3 py-2"></td>
+          <tr className="bg-slate-300 font-semibold text-slate-900">
+            <td className="px-3 py-2.5">Total</td>
+            <td className="px-3 py-2.5">{course.par}</td>
+            <td className="px-3 py-2.5"></td>
             {entries.map((entry) => {
               const isLeader = isScramble && leaderKeys.has(entry.key);
               const { played, rel } = relativeToPar(entry.key);
               return (
                 <td
                   key={entry.key}
-                  className={`px-3 py-2 ${isLeader ? "rounded-md bg-amber-200 text-amber-900" : ""}`}
+                  className={`px-3 py-2.5 ${isLeader ? "rounded-md bg-amber-200 text-amber-900" : ""}`}
                 >
                   {total(entry.key)}
                   {isScramble && played > 0 && (
@@ -391,8 +423,8 @@ export function ScoreGrid({ teeTime }: Props) {
       </table>
 
       {isScramble && mvpLeaders.length > 0 && (
-        <div className="border-t border-zinc-200 px-3 py-2 text-xs text-zinc-600">
-          <span className="font-medium text-zinc-700">Hole MVPs: </span>
+        <div className="border-t border-slate-200 px-3 py-2 text-xs text-slate-600">
+          <span className="font-medium text-slate-700">Hole MVPs: </span>
           {mvpLeaders.map(([name, count], i) => (
             <span key={name}>
               {i > 0 && " · "}
@@ -400,6 +432,22 @@ export function ScoreGrid({ teeTime }: Props) {
             </span>
           ))}
         </div>
+      )}
+
+      {selectedHole && (
+        <HoleDetailSheet
+          hole={selectedHole}
+          entries={entries}
+          scores={Object.fromEntries(entries.map((e) => [e.key, scores[e.key]?.[selectedHole.number] ?? null]))}
+          putts={Object.fromEntries(entries.map((e) => [e.key, putts[e.key]?.[selectedHole.number] ?? null]))}
+          mvp={mvp[selectedHole.number] ?? {}}
+          isScramble={isScramble}
+          canEdit={canEdit}
+          onSetScore={(player, value) => setScore(player, selectedHole.number, value)}
+          onSetPutts={(player, value) => setPutts(player, selectedHole.number, value)}
+          onSetMvp={(teamName, playerName) => setMvp(selectedHole.number, teamName, playerName)}
+          onClose={() => setSelectedHoleNumber(null)}
+        />
       )}
     </div>
   );

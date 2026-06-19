@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
@@ -39,22 +39,22 @@ export function VenmoSettings({ venmoMap }: Props) {
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-sm">
-        <span className="text-zinc-600">@</span>
+      <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-3 text-sm">
+        <span className="text-slate-600">@</span>
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="your-venmo-username"
-          className="flex-1 rounded-lg border border-zinc-300 px-2 py-1"
+          className="flex-1 rounded-lg border border-slate-300 px-2 py-1"
         />
         <button
           onClick={save}
           disabled={saving}
-          className="rounded-lg bg-green-700 px-3 py-1.5 font-semibold text-white disabled:opacity-50"
+          className="rounded-lg bg-emerald-700 px-3 py-1.5 font-semibold text-white disabled:opacity-50"
         >
           {saving ? "…" : "Save"}
         </button>
-        <button onClick={() => setEditing(false)} className="text-zinc-600">
+        <button onClick={() => setEditing(false)} className="text-slate-600">
           Cancel
         </button>
       </div>
@@ -64,12 +64,12 @@ export function VenmoSettings({ venmoMap }: Props) {
   return (
     <button
       onClick={startEdit}
-      className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm shadow-sm"
+      className="flex w-full items-center justify-between rounded-xl bg-slate-100 px-4 py-2 text-sm shadow-sm"
     >
-      <span className="text-zinc-600">
-        Your Venmo: <span className="font-semibold text-zinc-900">{myHandle ? `@${myHandle}` : "not set"}</span>
+      <span className="text-slate-600">
+        Your Venmo: <span className="font-semibold text-slate-900">{myHandle ? `@${myHandle}` : "not set"}</span>
       </span>
-      <span className="text-green-700">{myHandle ? "Edit" : "Set"}</span>
+      <span className="text-emerald-700">{myHandle ? "Edit" : "Set"}</span>
     </button>
   );
 }

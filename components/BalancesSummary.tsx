@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { type Expense } from "@/lib/supabase/client";
@@ -64,32 +64,32 @@ export function BalancesSummary({ expenses, venmoMap }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-zinc-700">Balances</p>
+        <p className="text-sm font-medium text-slate-700">Balances</p>
         <button
           onClick={share}
-          className="rounded-lg border border-green-700 px-3 py-1.5 text-sm font-semibold text-green-700"
+          className="rounded-lg border border-emerald-700 px-3 py-1.5 text-sm font-semibold text-emerald-700"
         >
           {copied ? "Copied!" : "Share"}
         </button>
       </div>
 
       {bigSpender && (
-        <p className="mb-3 text-xs text-amber-700">
-          💸 Big Spender: <span className="font-semibold">{bigSpender[0]}</span> (${bigSpender[1].toFixed(2)}
-          )
+        <p className="mb-3 text-xs text-slate-500">
+          Big Spender: <span className="font-semibold text-slate-700">{bigSpender[0]}</span> ($
+          {bigSpender[1].toFixed(2)})
         </p>
       )}
 
       {myDebts.length > 0 && (
-        <div className="mb-3 rounded-lg border border-green-700 bg-green-50 p-3">
-          <p className="text-sm font-semibold text-green-900">
+        <div className="mb-3 rounded-lg bg-emerald-50 p-3">
+          <p className="text-sm font-semibold text-emerald-900">
             You owe ${myTotal.toFixed(2)} total
           </p>
           <div className="mt-1 flex flex-col gap-0.5">
             {myDebts.map((s, i) => (
-              <p key={i} className="text-xs text-green-800">
+              <p key={i} className="text-xs text-emerald-700">
                 ${s.amount.toFixed(2)} to {s.to}
               </p>
             ))}
@@ -98,7 +98,7 @@ export function BalancesSummary({ expenses, venmoMap }: Props) {
       )}
 
       {settlements.length === 0 ? (
-        <p className="text-sm text-zinc-600">Everyone&apos;s settled up!</p>
+        <p className="text-sm text-slate-600">Everyone&apos;s settled up!</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {settlements.map((s, i) => {
@@ -107,12 +107,12 @@ export function BalancesSummary({ expenses, venmoMap }: Props) {
             return (
               <div key={i} className="flex items-center justify-between text-sm">
                 <span>
-                  <span className="font-semibold text-zinc-900">{s.from}</span>
-                  <span className="text-zinc-600"> owes </span>
-                  <span className="font-semibold text-zinc-900">{s.to}</span>
+                  <span className="font-semibold text-slate-900">{s.from}</span>
+                  <span className="text-slate-600"> owes </span>
+                  <span className="font-semibold text-slate-900">{s.to}</span>
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="font-semibold text-green-700">${s.amount.toFixed(2)}</span>
+                  <span className="font-semibold text-emerald-700">${s.amount.toFixed(2)}</span>
                   {isMine && (
                     <a
                       href={venmoPayUrl(handle, s.amount)}

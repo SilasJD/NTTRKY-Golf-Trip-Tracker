@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { supabase, type Expense, type ExpenseCategory } from "@/lib/supabase/client";
@@ -91,37 +91,37 @@ export function ExpenseManager({ expenses }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-zinc-700">Expenses</p>
+        <p className="text-sm font-medium text-slate-700">Expenses</p>
         <button
           onClick={startCreate}
-          className="rounded-lg bg-green-700 px-3 py-1.5 text-sm font-semibold text-white active:bg-green-800"
+          className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white active:bg-emerald-800"
         >
           + Add
         </button>
       </div>
 
       <div className="flex flex-col gap-2">
-        {expenses.length === 0 && <p className="text-sm text-zinc-600">No expenses logged yet.</p>}
+        {expenses.length === 0 && <p className="text-sm text-slate-600">No expenses logged yet.</p>}
         {expenses.map((e) => (
           <div
             key={e.id}
-            className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2"
+            className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2"
           >
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-zinc-900">{e.description}</span>
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-zinc-700">
+                <span className="text-sm font-semibold text-slate-900">{e.description}</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-700">
                   {categoryLabels[e.category]}
                 </span>
               </div>
-              <div className="text-xs text-zinc-600">
+              <div className="text-xs text-slate-600">
                 ${e.amount.toFixed(2)} · {e.paid_by} paid · split: {e.split_among.join(", ")}
               </div>
             </div>
             <div className="flex gap-2 pl-2">
-              <button onClick={() => startEdit(e)} className="text-xs text-green-700">
+              <button onClick={() => startEdit(e)} className="text-xs text-emerald-700">
                 Edit
               </button>
               <button onClick={() => remove(e.id)} className="text-xs text-red-600">
@@ -133,14 +133,14 @@ export function ExpenseManager({ expenses }: Props) {
       </div>
 
       {open && (
-        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-200 pt-4">
+        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4">
           <label className="flex flex-col gap-1 text-sm">
             Description
             <input
               value={draft.description}
               onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
               placeholder="Cart fees, pizza, lodging…"
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
 
@@ -153,7 +153,7 @@ export function ExpenseManager({ expenses }: Props) {
               step="0.01"
               value={draft.amount}
               onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))}
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
 
@@ -162,7 +162,7 @@ export function ExpenseManager({ expenses }: Props) {
             <select
               value={draft.category}
               onChange={(e) => setDraft((d) => ({ ...d, category: e.target.value as ExpenseCategory }))}
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             >
               {Object.entries(categoryLabels).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -177,7 +177,7 @@ export function ExpenseManager({ expenses }: Props) {
             <select
               value={draft.paid_by}
               onChange={(e) => setDraft((d) => ({ ...d, paid_by: e.target.value }))}
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             >
               {players.map((p) => (
                 <option key={p} value={p}>
@@ -197,8 +197,8 @@ export function ExpenseManager({ expenses }: Props) {
                   onClick={() => toggleSplit(name)}
                   className={`rounded-lg border px-2 py-1.5 text-sm ${
                     draft.split_among.includes(name)
-                      ? "border-green-700 bg-green-700 text-white"
-                      : "border-zinc-300 text-zinc-700"
+                      ? "border-emerald-700 bg-emerald-700 text-white"
+                      : "border-slate-300 text-slate-700"
                   }`}
                 >
                   {name}
@@ -211,13 +211,13 @@ export function ExpenseManager({ expenses }: Props) {
             <button
               onClick={save}
               disabled={saving}
-              className="flex-1 rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => setOpen(false)}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
             >
               Cancel
             </button>

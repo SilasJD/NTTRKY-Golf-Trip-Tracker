@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -52,11 +52,11 @@ export default function ScorecardPage() {
   const selected = teeTimes.find((t) => t.id === selectedId) ?? null;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 bg-zinc-50 p-4">
-      <Link href="/" className="text-sm text-green-700">
+    <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
+      <Link href="/" className="text-sm text-emerald-700">
         ← Home
       </Link>
-      <h1 className="text-xl font-bold text-zinc-900">Scorecard</h1>
+      <h1 className="text-xl font-bold text-slate-900">Scorecard</h1>
 
       <PlayerSwitcher />
       <TeeTimeManager teeTimes={teeTimes} selectedId={selectedId} onSelect={selectTeeTime} />
@@ -64,7 +64,7 @@ export default function ScorecardPage() {
       {selected ? (
         <ScoreGrid teeTime={selected} />
       ) : (
-        <p className="text-sm text-zinc-600">Select a tee time above to enter scores.</p>
+        <p className="text-sm text-slate-600">Select a tee time above to enter scores.</p>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { supabase, type TeeTime, type Team } from "@/lib/supabase/client";
@@ -97,12 +97,12 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-zinc-700">Tee times</p>
+        <p className="text-sm font-medium text-slate-700">Tee times</p>
         <button
           onClick={startCreate}
-          className="rounded-lg bg-green-700 px-3 py-1.5 text-sm font-semibold text-white active:bg-green-800"
+          className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white active:bg-emerald-800"
         >
           + Add
         </button>
@@ -110,7 +110,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
 
       <div className="flex flex-col gap-2">
         {teeTimes.length === 0 && (
-          <p className="text-sm text-zinc-600">No tee times scheduled yet.</p>
+          <p className="text-sm text-slate-600">No tee times scheduled yet.</p>
         )}
         {teeTimes.map((t) => {
           const course = courses.find((c) => c.slug === t.course_slug);
@@ -118,19 +118,19 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
             <div
               key={t.id}
               className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-                selectedId === t.id ? "border-green-700 bg-green-50" : "border-zinc-200"
+                selectedId === t.id ? "border-emerald-700 bg-emerald-50" : "border-slate-200"
               }`}
             >
               <button onClick={() => onSelect(t.id)} className="flex-1 text-left">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-zinc-900">{course?.name}</span>
+                  <span className="text-sm font-semibold text-slate-900">{course?.name}</span>
                   {t.format === "scramble" && (
-                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-green-700">
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-emerald-700">
                       Scramble
                     </span>
                   )}
                 </div>
-                <div className="text-xs text-zinc-600">
+                <div className="text-xs text-slate-600">
                   {t.play_date} · {t.tee_time} ·{" "}
                   {t.format === "scramble"
                     ? t.teams.map((team) => `${team.name} (${team.players.join("/")})`).join(" · ")
@@ -138,7 +138,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
                 </div>
               </button>
               <div className="flex gap-2 pl-2">
-                <button onClick={() => startEdit(t)} className="text-xs text-green-700">
+                <button onClick={() => startEdit(t)} className="text-xs text-emerald-700">
                   Edit
                 </button>
                 <button onClick={() => remove(t.id)} className="text-xs text-red-600">
@@ -151,7 +151,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
       </div>
 
       {open && (
-        <div className="mt-4 flex flex-col gap-3 border-t border-zinc-200 pt-4">
+        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4">
           <label className="flex flex-col gap-1 text-sm">
             Course
             <select
@@ -159,7 +159,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
               onChange={(e) =>
                 setDraft((d) => ({ ...d, course_slug: e.target.value as TeeTime["course_slug"] }))
               }
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             >
               {courses.map((c) => (
                 <option key={c.slug} value={c.slug}>
@@ -175,7 +175,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
               type="date"
               value={draft.play_date}
               onChange={(e) => setDraft((d) => ({ ...d, play_date: e.target.value }))}
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
 
@@ -185,7 +185,7 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
               type="time"
               value={draft.tee_time}
               onChange={(e) => setDraft((d) => ({ ...d, tee_time: e.target.value }))}
-              className="rounded-lg border border-zinc-300 px-3 py-2"
+              className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
 
@@ -199,8 +199,8 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
                   onClick={() => togglePlayer(name)}
                   className={`rounded-lg border px-2 py-1.5 text-sm ${
                     draft.players.includes(name)
-                      ? "border-green-700 bg-green-700 text-white"
-                      : "border-zinc-300 text-zinc-700"
+                      ? "border-emerald-700 bg-emerald-700 text-white"
+                      : "border-slate-300 text-slate-700"
                   }`}
                 >
                   {name}
@@ -217,8 +217,8 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
                 onClick={() => setDraft((d) => ({ ...d, format: "stroke" }))}
                 className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
                   draft.format === "stroke"
-                    ? "border-green-700 bg-green-700 text-white"
-                    : "border-zinc-300 text-zinc-700"
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-slate-300 text-slate-700"
                 }`}
               >
                 Individual
@@ -228,8 +228,8 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
                 onClick={() => setDraft((d) => ({ ...d, format: "scramble" }))}
                 className={`flex-1 rounded-lg border px-3 py-2 text-sm ${
                   draft.format === "scramble"
-                    ? "border-green-700 bg-green-700 text-white"
-                    : "border-zinc-300 text-zinc-700"
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-slate-300 text-slate-700"
                 }`}
               >
                 Scramble (Teams)
@@ -249,13 +249,13 @@ export function TeeTimeManager({ teeTimes, selectedId, onSelect }: Props) {
             <button
               onClick={save}
               disabled={saving}
-              className="flex-1 rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               onClick={() => setOpen(false)}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
             >
               Cancel
             </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type ScoreRow, type TeeTime } from "@/lib/supabase/client";
 import { getCourse } from "@/lib/courses";
@@ -44,24 +44,24 @@ export function RoundLeaderboard({ teeTime, scores }: Props) {
     });
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-sm font-medium text-zinc-700">
+    <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
+      <p className="mb-3 text-sm font-medium text-slate-700">
         {course.name} · {teeTime.play_date} {teeTime.tee_time}
       </p>
       <div className="flex flex-col gap-1.5">
         {standings.map((s, i) => (
           <div key={s.entry.key} className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2">
-              <span className="w-5 text-zinc-600">{s.thru > 0 ? i + 1 : "–"}</span>
+              <span className="w-5 text-slate-600">{s.thru > 0 ? i + 1 : "–"}</span>
               <span>
-                <span className="font-semibold text-zinc-900">{s.entry.label}</span>
-                {s.entry.sublabel && <span className="ml-1 text-xs text-zinc-600">({s.entry.sublabel})</span>}
+                <span className="font-semibold text-slate-900">{s.entry.label}</span>
+                {s.entry.sublabel && <span className="ml-1 text-xs text-slate-600">({s.entry.sublabel})</span>}
               </span>
             </span>
-            <span className="flex items-center gap-3 text-zinc-600">
+            <span className="flex items-center gap-3 text-slate-600">
               <span className="text-xs">Thru {s.thru}</span>
-              <span className="w-10 text-right font-semibold text-zinc-900">{s.thru > 0 ? s.total : "–"}</span>
-              <span className="w-8 text-right font-semibold text-green-700">
+              <span className="w-10 text-right font-semibold text-slate-900">{s.thru > 0 ? s.total : "–"}</span>
+              <span className="w-8 text-right font-semibold text-emerald-700">
                 {s.thru > 0 ? formatToPar(s.rel) : ""}
               </span>
             </span>

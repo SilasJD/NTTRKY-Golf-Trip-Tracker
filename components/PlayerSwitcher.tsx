@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { players, playerHints, type Player } from "@/lib/players";
@@ -46,28 +46,28 @@ export function PlayerSwitcher() {
   if (!player || picking) {
     if (selected) {
       return (
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="mb-3 text-sm font-medium text-zinc-700">Password for {selected}</p>
+        <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
+          <p className="mb-3 text-sm font-medium text-slate-700">Password for {selected}</p>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
             autoFocus
-            className="mb-2 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button
               onClick={submit}
               disabled={loading}
-              className="flex-1 rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {loading ? "…" : "Sign in"}
             </button>
             <button
               onClick={reset}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-600"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600"
             >
               Back
             </button>
@@ -75,9 +75,9 @@ export function PlayerSwitcher() {
           {playerHints[selected] && (
             <div className="mt-2">
               {showHint ? (
-                <p className="text-xs text-zinc-600">Hint: {playerHints[selected]}</p>
+                <p className="text-xs text-slate-600">Hint: {playerHints[selected]}</p>
               ) : (
-                <button onClick={() => setShowHint(true)} className="text-xs text-green-700">
+                <button onClick={() => setShowHint(true)} className="text-xs text-emerald-700">
                   Forgot password? Show hint
                 </button>
               )}
@@ -88,14 +88,14 @@ export function PlayerSwitcher() {
     }
 
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <p className="mb-3 text-sm font-medium text-zinc-700">Who are you?</p>
+      <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
+        <p className="mb-3 text-sm font-medium text-slate-700">Who are you?</p>
         <div className="grid grid-cols-3 gap-2">
           {players.map((name) => (
             <button
               key={name}
               onClick={() => setSelected(name)}
-              className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white active:bg-green-800"
+              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white active:bg-slate-700"
             >
               {name}
             </button>
@@ -106,12 +106,12 @@ export function PlayerSwitcher() {
   }
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm shadow-sm">
-      <span className="text-zinc-600">
-        Playing as <span className="font-semibold text-zinc-900">{player}</span>
+    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-2 text-sm shadow-sm">
+      <span className="text-slate-600">
+        Playing as <span className="font-semibold text-slate-900">{player}</span>
       </span>
       <span className="flex gap-3">
-        <button onClick={() => setPicking(true)} className="text-green-700">
+        <button onClick={() => setPicking(true)} className="text-emerald-700">
           Switch
         </button>
         <button onClick={() => clearPlayer()} className="text-red-600">

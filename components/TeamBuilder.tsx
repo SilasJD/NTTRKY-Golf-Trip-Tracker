@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type Team } from "@/lib/supabase/client";
 
@@ -42,7 +42,7 @@ export function TeamBuilder({ players, teams, onChange }: Props) {
         <button
           type="button"
           onClick={addTeam}
-          className="rounded-lg border border-green-700 px-2 py-1 text-xs font-semibold text-green-700"
+          className="rounded-lg border border-emerald-700 px-2 py-1 text-xs font-semibold text-emerald-700"
         >
           + Team
         </button>
@@ -53,12 +53,12 @@ export function TeamBuilder({ players, teams, onChange }: Props) {
       )}
 
       {teams.map((team, i) => (
-        <div key={i} className="rounded-lg border border-zinc-200 p-3">
+        <div key={i} className="rounded-lg border border-slate-200 p-3">
           <div className="mb-2 flex items-center gap-2">
             <input
               value={team.name}
               onChange={(e) => renameTeam(i, e.target.value)}
-              className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+              className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-sm"
             />
             <button type="button" onClick={() => removeTeam(i)} className="text-xs text-red-600">
               Remove
@@ -76,10 +76,10 @@ export function TeamBuilder({ players, teams, onChange }: Props) {
                   onClick={() => togglePlayer(i, p)}
                   className={`rounded-lg border px-2 py-1.5 text-sm ${
                     selected
-                      ? "border-green-700 bg-green-700 text-white"
+                      ? "border-emerald-700 bg-emerald-700 text-white"
                       : disabled
-                        ? "border-zinc-200 text-zinc-300"
-                        : "border-zinc-300 text-zinc-700"
+                        ? "border-slate-200 text-slate-700"
+                        : "border-slate-300 text-slate-700"
                   }`}
                 >
                   {p}

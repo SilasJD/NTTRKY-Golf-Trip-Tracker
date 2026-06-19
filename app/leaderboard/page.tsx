@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -46,18 +46,18 @@ export default function LeaderboardPage() {
   const selectedScores = scores.filter((s) => s.tee_time_id === selectedId);
 
   return (
-    <div className="flex flex-1 flex-col gap-4 bg-zinc-50 p-4">
-      <Link href="/" className="text-sm text-green-700">
+    <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
+      <Link href="/" className="text-sm text-emerald-700">
         ← Home
       </Link>
-      <h1 className="text-xl font-bold text-zinc-900">Leaderboard</h1>
+      <h1 className="text-xl font-bold text-slate-900">Leaderboard</h1>
 
       <TripLeaderboard teeTimes={teeTimes} scores={scores} />
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <p className="mb-3 text-sm font-medium text-zinc-700">Rounds</p>
+      <div className="rounded-xl bg-slate-100 p-4 shadow-sm">
+        <p className="mb-3 text-sm font-medium text-slate-700">Rounds</p>
         <div className="flex flex-col gap-2">
-          {teeTimes.length === 0 && <p className="text-sm text-zinc-600">No tee times scheduled yet.</p>}
+          {teeTimes.length === 0 && <p className="text-sm text-slate-600">No tee times scheduled yet.</p>}
           {teeTimes.map((t) => {
             const course = courses.find((c) => c.slug === t.course_slug);
             return (
@@ -65,11 +65,11 @@ export default function LeaderboardPage() {
                 key={t.id}
                 onClick={() => setSelectedId(t.id)}
                 className={`rounded-lg border px-3 py-2 text-left ${
-                  selectedId === t.id ? "border-green-700 bg-green-50" : "border-zinc-200"
+                  selectedId === t.id ? "border-emerald-700 bg-emerald-50" : "border-slate-200"
                 }`}
               >
-                <div className="text-sm font-semibold text-zinc-900">{course?.name}</div>
-                <div className="text-xs text-zinc-600">
+                <div className="text-sm font-semibold text-slate-900">{course?.name}</div>
+                <div className="text-xs text-slate-600">
                   {t.play_date} · {t.tee_time}
                 </div>
               </button>

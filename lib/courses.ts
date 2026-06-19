@@ -2,6 +2,7 @@ export type Hole = {
   number: number;
   par: number;
   yards: number;
+  image?: string;
 };
 
 export type Course = {
@@ -11,6 +12,11 @@ export type Course = {
   par: number;
   holes: Hole[];
 };
+
+function wolfCreekImage(holeNumber: number) {
+  const padded = String(holeNumber).padStart(2, "0");
+  return `https://wolfcreekresort.com/2021/wp-content/uploads/2021/03/18-Holes-${padded}.png`;
+}
 
 export const courses: Course[] = [
   {
@@ -37,7 +43,7 @@ export const courses: Course[] = [
       { number: 16, par: 3, yards: 162 },
       { number: 17, par: 4, yards: 389 },
       { number: 18, par: 4, yards: 375 },
-    ],
+    ].map((hole) => ({ ...hole, image: wolfCreekImage(hole.number) })),
   },
   {
     slug: "mt-ogden",
