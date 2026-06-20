@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Trophy, Flame, Coins, Skull, Sparkles, Bird } from "lucide-react";
 import { supabase, type TeeTime, type ScoreRow } from "@/lib/supabase/client";
 import { computeAwards, type Award } from "@/lib/awards";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
+
+const section = sections.find((s) => s.href === "/awards")!;
 
 const icons: Record<string, typeof Trophy> = {
   "three-putts": Skull,
@@ -49,10 +52,7 @@ export default function AwardsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Awards</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       {awards.length === 0 ? (
         <div className="rounded-xl bg-slate-100 p-4 shadow-sm">

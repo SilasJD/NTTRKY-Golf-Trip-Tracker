@@ -1,14 +1,14 @@
-import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { itinerary } from "@/lib/itinerary";
+import { sections } from "@/lib/sections";
+import { PageHeader } from "@/components/PageHeader";
+
+const section = sections.find((s) => s.href === "/itinerary")!;
 
 export default function ItineraryPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Itinerary</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <div className="flex flex-col gap-3">
         {itinerary.map((day) => (

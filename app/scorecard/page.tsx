@@ -1,13 +1,15 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase, type TeeTime } from "@/lib/supabase/client";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { TeeTimeManager } from "@/components/TeeTimeManager";
 import { ScoreGrid } from "@/components/ScoreGrid";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
 
 const SELECTED_TEE_TIME_KEY = "nttrky-selected-tee-time";
+const section = sections.find((s) => s.href === "/scorecard")!;
 
 export default function ScorecardPage() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
@@ -53,10 +55,7 @@ export default function ScorecardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Scorecard</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <PlayerSwitcher />
       <TeeTimeManager teeTimes={teeTimes} selectedId={selectedId} onSelect={selectTeeTime} />

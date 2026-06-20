@@ -1,11 +1,14 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase, type TeeTime, type ScoreRow } from "@/lib/supabase/client";
 import { courses } from "@/lib/courses";
 import { TripLeaderboard } from "@/components/TripLeaderboard";
 import { RoundLeaderboard } from "@/components/RoundLeaderboard";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
+
+const section = sections.find((s) => s.href === "/leaderboard")!;
 
 export default function LeaderboardPage() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
@@ -47,10 +50,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Leaderboard</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <TripLeaderboard teeTimes={teeTimes} scores={scores} />
 

@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase, type TeeTime, type ScoreRow, type SkinsSettings } from "@/lib/supabase/client";
 import { courses } from "@/lib/courses";
 import { TripSkins } from "@/components/TripSkins";
 import { RoundSkins } from "@/components/RoundSkins";
 import { SkinsBuyIn } from "@/components/SkinsBuyIn";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
+
+const section = sections.find((s) => s.href === "/skins")!;
 
 export default function SkinsPage() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
@@ -58,10 +61,7 @@ export default function SkinsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Skins</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <SkinsBuyIn settings={settings} />
 

@@ -1,12 +1,15 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase, type Expense, type PlayerVenmo, type TeeTime, type ScoreRow, type SkinsSettings, type SideBet } from "@/lib/supabase/client";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { ExpenseManager } from "@/components/ExpenseManager";
 import { BalancesSummary } from "@/components/BalancesSummary";
 import { VenmoSettings } from "@/components/VenmoSettings";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
+
+const section = sections.find((s) => s.href === "/costs")!;
 
 export default function CostsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -105,10 +108,7 @@ export default function CostsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Costs</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <PlayerSwitcher />
       <VenmoSettings venmoMap={venmoMap} />

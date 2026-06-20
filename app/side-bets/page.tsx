@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase, type SideBet } from "@/lib/supabase/client";
 import { PlayerSwitcher } from "@/components/PlayerSwitcher";
 import { SideBetManager } from "@/components/SideBetManager";
+import { PageHeader } from "@/components/PageHeader";
+import { sections } from "@/lib/sections";
+
+const section = sections.find((s) => s.href === "/side-bets")!;
 
 export default function SideBetsPage() {
   const [bets, setBets] = useState<SideBet[]>([]);
@@ -32,10 +35,7 @@ export default function SideBetsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 bg-slate-300 p-4">
-      <Link href="/" className="text-sm text-emerald-700">
-        ← Home
-      </Link>
-      <h1 className="text-xl font-bold text-slate-900">Side Bets</h1>
+      <PageHeader title={section.title} icon={section.icon} badge={section.badge} />
 
       <PlayerSwitcher />
       <SideBetManager bets={bets} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Pencil, X } from "lucide-react";
 import { supabase, type PhotosLink as PhotosLinkRow } from "@/lib/supabase/client";
 import { useCurrentPlayer } from "@/lib/useCurrentPlayer";
 import { notifySaveError } from "@/lib/toast";
@@ -63,57 +63,73 @@ export function PhotosLink() {
 
   const url = link?.url ?? "";
 
-  if (editing) {
-    return (
-      <div className="flex flex-col gap-2 rounded-xl bg-slate-100 p-3 shadow-sm">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Google Drive folder link…"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        />
-        <div className="flex gap-2">
-          <button
-            onClick={save}
-            disabled={saving}
-            className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
-          <button
-            onClick={() => setEditing(false)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-2 text-sm shadow-sm">
-      {url ? (
+    <>
+      <div className="relative aspect-square">
         <a
-          href={url}
+          href={url || undefined}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-slate-700"
+          onClick={(e) => {
+            if (!url) e.preventDefault();
+          }}
+          className="flex h-full w-full flex-col items-center justify-center gap-2.5 rounded-2xl bg-cyan-50 p-3 text-center shadow-md transition active:scale-95"
         >
-          <ImageIcon size={15} strokeWidth={2.25} />
-          Shared Photos
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-700 text-white shadow-lg">
+            <ImageIcon size={28} strokeWidth={2.25} />
+          </span>
+          <span className="text-sm font-semibold text-slate-900">Photos</span>
         </a>
-      ) : (
-        <span className="flex items-center gap-1.5 text-slate-600">
-          <ImageIcon size={15} strokeWidth={2.25} />
-          No photos link set yet
-        </span>
+        {currentPlayer && (
+          <button
+            onClick={startEdit}
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/80 text-slate-600 shadow active:bg-white"
+          >
+            <Pencil size={13} />
+          </button>
+        )}
+      </div>
+
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setEditing(false)}
+        >
+          <div
+            className="flex w-full max-w-sm flex-col gap-3 rounded-2xl bg-slate-50 p-4 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-900">Shared photos link</p>
+              <button onClick={() => setEditing(false)} className="text-slate-500">
+                <X size={18} />
+              </button>
+            </div>
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Google Drive folder link…"
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={save}
+                disabled={saving}
+                className="flex-1 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {saving ? "Saving…" : "Save"}
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
+              >
+                Cancel
+              </button>
+            </div>
+            {link?.updated_by && <p className="text-[10px] text-slate-500">Last set by {link.updated_by}</p>}
+          </div>
+        </div>
       )}
-      {currentPlayer && (
-        <button onClick={startEdit} className="text-xs text-emerald-700">
-          {url ? "Edit" : "Set"}
-        </button>
-      )}
-    </div>
+    </>
   );
 }
