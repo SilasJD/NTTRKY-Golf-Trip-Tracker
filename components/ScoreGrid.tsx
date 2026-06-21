@@ -60,6 +60,9 @@ export function ScoreGrid({ teeTime }: Props) {
   const inputRefs = useRef(new Map<string, HTMLInputElement>());
   const pendingFocusRef = useRef<string | null>(null);
   const advanceTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const toastTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const saveTimers = useRef(new Map<string, { timer: ReturnType<typeof setTimeout>; flush: () => void }>());
+  const stepKeyRef = useRef(false);
 
   function cellKey(holeNumber: number, entryKey: string) {
     return `${holeNumber}::${entryKey}`;
@@ -73,6 +76,8 @@ export function ScoreGrid({ teeTime }: Props) {
 
   useEffect(() => {
     let active = true;
+    const timers = toastTimers.current;
+    const pendingSaves = saveTimers.current;
 
     async function load() {
       const [scoresRes, mvpRes] = await Promise.all([
@@ -122,15 +127,22 @@ export function ScoreGrid({ teeTime }: Props) {
           });
 
           if (payload.eventType !== "DELETE" && row.strokes != null && course) {
-            const hole = course.holes.find((h) => h.number === row.hole_number);
-            if (hole) {
-              const diff = row.strokes - hole.par;
+            const timerKey = cellKey(row.hole_number, row.player_name);
+            const existing = toastTimers.current.get(timerKey);
+            if (existing) clearTimeout(existing);
+            const strokes = row.strokes;
+            const timer = setTimeout(() => {
+              toastTimers.current.delete(timerKey);
+              const hole = course.holes.find((h) => h.number === row.hole_number);
+              if (!hole) return;
+              const diff = strokes - hole.par;
               const label = entries.find((e) => e.key === row.player_name)?.label ?? row.player_name;
               if (diff <= -3) addToast(`🤯 Albatross for ${label} on hole ${row.hole_number}!`);
               else if (diff === -2) addToast(`🦅 Eagle for ${label} on hole ${row.hole_number}!`);
-              else if (diff >= 3) addToast(`💀 ${label} took a ${row.strokes} on hole ${row.hole_number}... yikes`);
+              else if (diff >= 3) addToast(`💀 ${label} took a ${strokes} on hole ${row.hole_number}... yikes`);
               else if (diff === 2) addToast(`💥 Double bogey for ${label} on hole ${row.hole_number}`);
-            }
+            }, 1000);
+            toastTimers.current.set(timerKey, timer);
           }
         }
       )
@@ -152,6 +164,13 @@ export function ScoreGrid({ teeTime }: Props) {
     return () => {
       active = false;
       supabase.removeChannel(channel);
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+      for (const pending of pendingSaves.values()) {
+        clearTimeout(pending.timer);
+        pending.flush();
+      }
+      pendingSaves.clear();
     };
     // course/entries are derived from teeTime and only need to be current at
     // subscribe time (toast labels); resubscribing the channel on every
@@ -170,40 +189,62 @@ export function ScoreGrid({ teeTime }: Props) {
     }
   }, [half]);
 
-  async function setScore(player: string, hole: number, value: string) {
+  function setScore(player: string, hole: number, value: string) {
     const strokes = value === "" ? null : Number(value);
     setScores((prev) => ({
       ...prev,
       [player]: { ...prev[player], [hole]: strokes },
     }));
-    const { error } = await supabase
-      .from("scores")
-      .upsert(
-        { tee_time_id: teeTime.id, player_name: player, hole_number: hole, strokes },
-        { onConflict: "tee_time_id,player_name,hole_number" }
-      );
-    if (error) {
-      console.error(error);
-      notifySaveError(`hole ${hole} score`, () => setScore(player, hole, value));
+
+    const key = `score::${cellKey(hole, player)}`;
+    const pending = saveTimers.current.get(key);
+    if (pending) clearTimeout(pending.timer);
+
+    async function flush() {
+      saveTimers.current.delete(key);
+      const { error } = await supabase
+        .from("scores")
+        .upsert(
+          { tee_time_id: teeTime.id, player_name: player, hole_number: hole, strokes },
+          { onConflict: "tee_time_id,player_name,hole_number" }
+        );
+      if (error) {
+        console.error(error);
+        notifySaveError(`hole ${hole} score`, () => setScore(player, hole, value));
+      }
     }
+
+    const timer = setTimeout(flush, 400);
+    saveTimers.current.set(key, { timer, flush });
   }
 
-  async function setPutts(player: string, hole: number, value: string) {
+  function setPutts(player: string, hole: number, value: string) {
     const puttCount = value === "" ? null : Number(value);
     setPuttsMap((prev) => ({
       ...prev,
       [player]: { ...prev[player], [hole]: puttCount },
     }));
-    const { error } = await supabase
-      .from("scores")
-      .upsert(
-        { tee_time_id: teeTime.id, player_name: player, hole_number: hole, putts: puttCount },
-        { onConflict: "tee_time_id,player_name,hole_number" }
-      );
-    if (error) {
-      console.error(error);
-      notifySaveError(`hole ${hole} putts`, () => setPutts(player, hole, value));
+
+    const key = `putts::${cellKey(hole, player)}`;
+    const pending = saveTimers.current.get(key);
+    if (pending) clearTimeout(pending.timer);
+
+    async function flush() {
+      saveTimers.current.delete(key);
+      const { error } = await supabase
+        .from("scores")
+        .upsert(
+          { tee_time_id: teeTime.id, player_name: player, hole_number: hole, putts: puttCount },
+          { onConflict: "tee_time_id,player_name,hole_number" }
+        );
+      if (error) {
+        console.error(error);
+        notifySaveError(`hole ${hole} putts`, () => setPutts(player, hole, value));
+      }
     }
+
+    const timer = setTimeout(flush, 400);
+    saveTimers.current.set(key, { timer, flush });
   }
 
   async function setMvp(hole: number, teamName: string, playerName: string) {
@@ -324,22 +365,26 @@ export function ScoreGrid({ teeTime }: Props) {
     return streak;
   }
 
-  function scoreMarkClass(strokes: number | null, par: number) {
-    if (strokes == null) return "rounded-lg border-slate-300 bg-white";
+  function scoreMarkClass(strokes: number | null, par: number, editable: boolean) {
+    if (strokes == null) {
+      return editable
+        ? "rounded-lg border-slate-300 bg-white"
+        : "rounded-lg border-slate-200 bg-slate-50 text-slate-500";
+    }
     const diff = strokes - par;
     if (diff <= -2) {
-      return "rounded-full border-2 border-amber-600 ring-2 ring-amber-600 ring-offset-1 bg-amber-100 text-amber-900 font-bold";
+      return "rounded-full border-2 border-slate-900 ring-2 ring-slate-900 ring-offset-1 bg-white text-red-600 font-bold";
     }
     if (diff === -1) {
-      return "rounded-full border-2 border-emerald-700 bg-emerald-100 text-emerald-900 font-semibold";
+      return "rounded-full border-2 border-slate-900 bg-white text-red-600 font-semibold";
     }
     if (diff === 0) {
       return "rounded-lg border-slate-300 bg-white text-slate-900";
     }
     if (diff === 1) {
-      return "rounded-md border-2 border-orange-600 bg-orange-100 text-orange-900";
+      return "rounded-none border-2 border-slate-900 bg-white text-slate-900";
     }
-    return "rounded-md border-2 border-red-700 ring-2 ring-red-700 ring-offset-1 bg-red-100 text-red-900 font-bold";
+    return "rounded-none border-2 border-slate-900 ring-2 ring-slate-900 ring-offset-1 bg-white text-slate-900 font-bold";
   }
 
   const visibleHoles = half === "front" ? course.holes.slice(0, 9) : course.holes.slice(9);
@@ -444,11 +489,7 @@ export function ScoreGrid({ teeTime }: Props) {
               {entries.map((entry) => {
                 const editable = canEdit(entry);
                 const value = scores[entry.key]?.[hole.number] ?? null;
-                const markClass = isScramble
-                  ? scoreMarkClass(value, hole.par)
-                  : editable
-                    ? "rounded-lg border-slate-300 bg-white"
-                    : "rounded-lg border-slate-200 bg-slate-50 text-slate-500";
+                const markClass = scoreMarkClass(value, hole.par, editable);
                 return (
                   <td key={entry.key} className="px-1.5 py-1.5">
                     <input
@@ -464,13 +505,17 @@ export function ScoreGrid({ teeTime }: Props) {
                       disabled={!editable}
                       value={value ?? ""}
                       onFocus={(e) => e.target.select()}
+                      onKeyDown={(e) => {
+                        stepKeyRef.current = e.key === "ArrowUp" || e.key === "ArrowDown";
+                      }}
                       onChange={(e) => {
                         setScore(entry.key, hole.number, e.target.value);
-                        scheduleAdvance(hole.number, entry.key, e.target.value);
+                        if (!stepKeyRef.current) {
+                          scheduleAdvance(hole.number, entry.key, e.target.value);
+                        }
+                        stepKeyRef.current = false;
                       }}
-                      className={`h-9 w-9 border-2 p-0 text-center text-sm transition-colors ${markClass} ${
-                        !editable && value == null ? "text-slate-400" : ""
-                      }`}
+                      className={`h-9 w-9 border-2 p-0 text-center text-sm transition-colors ${markClass}`}
                     />
                   </td>
                 );

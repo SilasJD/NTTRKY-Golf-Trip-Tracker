@@ -15,7 +15,7 @@ export type Course = {
 
 function wolfCreekImage(holeNumber: number) {
   const padded = String(holeNumber).padStart(2, "0");
-  return `https://wolfcreekresort.com/2021/wp-content/uploads/2021/03/18-Holes-${padded}.png`;
+  return `/holes/wolf-creek/hole-${padded}.png`;
 }
 
 export const courses: Course[] = [
